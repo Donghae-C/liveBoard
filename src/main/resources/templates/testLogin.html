@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>닉네임</title>
+</head>
+<body>
+  <input type="text" id="testLoginBox" placeholder="닉네임">
+  <input type="button" id="testLoginBtn" value="입장" onclick="login()">
+  <script>
+    function login(){
+      const id = document.getElementById("testLoginBox").value;
+      if(id.trim() === ""){
+          alert("입력해야함");
+          return;
+      }
+        fetch('http://210.117.31.169/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: `
+                query {
+                    testLogin(id: "${id}")
+                }
+                `
+            }),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                if (data.data.testLogin) {
+                    window.location.href = '/testMain'
+                } else {
+                    alert("에러")
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById("result1").innerText = "에러 발생: " + error.message;
+            });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+type Query{
+    login(id: ID, pw: String): MemberVO
+    callGroupList : [MgroupListVO]
+    myPage : MemberVO
+    idCheck(id:ID!) : Boolean
+    testLogin(id:ID!): Boolean
+}
+
+type Mutation{
+    registMember(id:ID!, pw:String!, name:String!, email:String!, mpublic:Boolean): Boolean
+    updateMember(id:ID!, pw:String!, name:String!, email:String!, mpublic:Boolean): Boolean
+    deleteMember(pw:String!): Boolean
+}
+
+type MemberVO{
+    m_id: ID
+    m_name: String
+    m_email:String
+    m_grade:Int
+    m_rating:Int
+    m_regdate:Date
+    m_public:Int
+}
+type MgroupListVO{
+    g_no:Int
+    g_name:String
+    g_intro:String
+    g_regdate:String
+    g_public:Int
+}
+type Date{
+    day:Int
+    month:Int
+    year:Int
+}

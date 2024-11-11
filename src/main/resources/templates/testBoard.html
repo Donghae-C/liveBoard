@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+    <div id="boardBox" style="width: 500px; display: inline-block">
+        <div id="boardBox1">
+
+        </div>
+        <div id="boardBox2">
+            <input type="button" id="write" value="글쓰기" onclick="writeBoard()">
+        </div>
+    </div>
+    <div id="contentBox" style="width: 500px; display: inline-block">
+
+    </div>
+
+  <script>
+      function viewMain(){
+          const message = {
+              type: "view"
+          }
+          socket.send(JSON.stringify(message));
+      }
+      function viewContent(number){
+          const message = {
+              type: "viewContent",
+              number: number
+          }
+          socket.send(JSON.stringify(message));
+      }
+    const socket = new WebSocket("ws://210.117.31.169/testBoardMain");
+    socket.onopen = function(event) {
+        console.log("WebSocket 연결 성공!");
+        viewMain();
+    };
+
+    socket.onmessage = function(event) {
+        console.log("서버로부터 받은 메시지:", event.data);
+        const boardList = JSON.parse(event.data);
+        if(!Array.isArray(boardList)){
+            document.getElementById("contentBox").innerHTML = `
+            `;
+            document.getElementById("contentBox").innerHTML = `
+            <div>
+                글쓴이 : ${boardList.author}
+            </div>
+            <div>
+                제목 : ${boardList.title}
+            </div>
+            <div>
+                등록일 : ${boardList.regDate}
+            </div>
+            <div>
+                내용 : ${boardList.content}
+            </div>
+            `;
+        }else{
+            document.getElementById("boardBox1").innerHTML = "<div><hr></div>";
+            for(let i = 0; i < boardList.length; i++){
+                document.getElementById("boardBox1").innerHTML += `
+            <div onclick="viewContent(${i})">
+                글쓴이 : ${boardList[i].author}<br>
+                제목 : ${boardList[i].title}
+            </div>
+            <hr>
+            `;
+            }
+        }
+
+
+    };
+
+    socket.onclose = function(event) {
+        window.location.href = '/testLogin'
+        console.log("WebSocket 연결 종료:", event);
+    };
+
+    socket.onerror = function(error) {
+        window.location.href = '/testLogin'
+        console.error("WebSocket 에러:", error);
+    };
+    function writeBoard(){
+        document.getElementById("contentBox").innerHTML = `
+    <input type="text" placeholder="제목" style="width: 300px;" id="boardTitle"><br>
+    <textarea placeholder="내용" width="300px" style="width: 300px; height: 200px;" id="boardContent"></textarea><br>
+    <input type="file" id="boardFile"><br>
+    <input type="button" value="등록" onclick="writeBoard2()">
+    <input type="button" value="닫기" onclick="closeWrite()">
+`;
+    }
+    function closeWrite(){
+        document.getElementById("contentBox").innerHTML = "";
+    }
+
+    function writeBoard2(){
+        const title = document.getElementById("boardTitle").value;
+        const content = document.getElementById("boardContent").value;
+        //const file = document.getElementById("boardFile").files[0];
+        const unique = Date.now();
+        // console.log(title);
+        // console.log(content);
+        // console.log(file.files[0].name);
+        console.log(unique);
+        const message = {
+            type: "write",
+            title: title,
+            content: content
+        }
+        socket.send(JSON.stringify(message));
+        closeWrite();
+    }
+    function messageToServer(t, c, u){
+        const message = {
+            unique: u,
+            title: t,
+            content: c
+        };
+        socket.send(JSON.stringify(message));
+    }
+    function imageToServer(f, u){
+        const reader = new FileReader();
+        reader.onload = function (e){
+            const imageFile = e.target.result;
+            const message = {
+                unique: u,
+                image: imageFile
+            }
+        };
+
+    }
+  </script>
+</body>
+</html>

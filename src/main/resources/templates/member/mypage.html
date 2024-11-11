@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>테스트 메인페이지</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+            integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/all.css">
+</head>
+<body data-bs-theme="dark">
+<div class="main">
+    <div th:replace="~{includes/header.html}">
+
+    </div>
+
+    <div class="row" id="mainbox">
+        <div class="my-3 p-3 bg-body rounded shadow-sm" id="myPageBox">
+        </div>
+        <button class="btn btn-primary" onclick="location.href='/member/updateProfile'">정보수정하기</button>
+        <button class="btn btn-primary" onclick="deleteMember()">탈퇴하기</button>
+    </div>
+    <!-- Modal -->
+    <div th:replace="~{includes/message.html}">
+
+    </div>
+</div>
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="passwordModalLabel">비밀번호 입력</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="password" id="modalPassword" class="form-control" placeholder="비밀번호를 입력하세요">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" onclick="submitPassword()">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.min.js" integrity="sha384-Rx+T1VzGupg4BHQYs2gCW9It+akI2MM/mndMCy36UVfodzcJcF0GGLxZIzObiEfa" crossorigin="anonymous"></script>
+    <script>
+        window.onload = function (){
+            fetch('http://210.117.31.169/graphql', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    query: `
+                query {
+                    myPage {
+                        m_id
+                        m_name
+                        m_email
+                        m_regdate
+                        m_public
+                    }
+                }
+                `
+                }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data);
+                    if (data.data.myPage) {
+                        const myPageBox = document.getElementById("myPageBox");
+                        myPageBox.innerHTML = "";
+                        myPageBox.innerHTML = `
+                        <span>${data.data.myPage.m_id}</span><br>
+                        <span>${data.data.myPage.m_name}</span><br>
+                        <span>${data.data.myPage.m_email}</span><br>
+                        <span>${data.data.myPage.m_regdate}</span><br>
+                        <span>${data.data.myPage.m_public}</span><br>
+                        `
+
+                    } else {
+                        console.log("스읍..?")
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById("result1").innerText = "에러 발생: " + error.message;
+                });
+        }
+        function deleteMember(){
+            if(confirm("ㄹㅇ?")){
+                if(confirm("걍 다 삭제해?")){
+                    const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+                    modal.show();
+                }else {
+                    return;
+                }
+            }else {
+                return;;
+            }
+        }
+        function submitPassword(){
+            const pw = document.getElementById("modalPassword").value;
+            const modal = bootstrap.Modal.getInstance(document.getElementById('passwordModal'));
+            modal.hide();
+                fetch('http://210.117.31.169/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: `
+                mutation {
+                    deleteMember(pw:"${pw}")
+                }
+                `
+                    }),
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log(data);
+                        if (data.data.deleteMember) {
+                            alert("ㅂㅂ ㅠㅠ");
+                            window.location.href = '/';
+                        } else {
+                            alert("비밀번호가 안맞는대");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById("result1").innerText = "에러 발생: " + error.message;
+                    });
+        }
+    </script>
+</body>
+</html>

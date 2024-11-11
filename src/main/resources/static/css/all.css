@@ -1,0 +1,21 @@
+.main{
+    width: 100%;
+    max-width: 1400px;
+    margin: auto;
+}
+#mainbox{
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+#mybtn{
+    float: right;
+}
+.f_right{
+    display: inline;
+    position: relative;
+    float: right;
+}
+#registerbox{
+    margin-top: 30px;
+}

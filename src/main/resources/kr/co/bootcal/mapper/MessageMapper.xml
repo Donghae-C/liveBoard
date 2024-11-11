@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.bootcal.mapper.MessageMapper">
+	<select id="getUnreadMessage" resultType="kr.co.bootcal.domain.MessageVO">
+		select * from message where msg_recid = #{m_id} and msg_check = 0 order by msg_no desc
+	</select>
+	<select id="getAllMessage" resultType="kr.co.bootcal.domain.MessageVO">
+		select * from message where msg_recid = #{m_id} order by msg_no desc LIMIT #{limit} OFFSET #{offset};
+	</select>
+	<select id="countMessage" resultType="Integer">
+		select count(*) from message where msg_recid = #{m_id}
+	</select>
+	<insert id="sendMessage">
+		insert into message(msg_sendid, msg_recid, msg_content) values (#{msg_sendid}, #{msg_recid}, #{msg_content})
+	</insert>
+	<update id="readOneMessage">
+		update message set msg_check = 1 where msg_no = #{msg_no};
+	</update>
+	<update id="readAllMessage">
+		update message set msg_check = 1 where msg_recid = #{m_id};
+	</update>
+	<delete id="deleteMessage">
+		delete from message where msg_no = #{msg_no}
+	</delete>
+</mapper>

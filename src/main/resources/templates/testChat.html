@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>웹소켓테스트</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div id="testMainBox">
+  <div id="testbox">
+
+  </div>
+  <input type="text" id="messagebox">
+  <input type="button" value="전송" onclick="sendmessage()">
+</div>
+
+<script>
+  const socket = new WebSocket("ws://210.117.31.169/test");
+  // 연결 성공 시
+  socket.onopen = function(event) {
+    console.log("WebSocket 연결 성공!");
+    socket.send("입장");
+  };
+  function sendmessage(){
+    const message = document.getElementById("messagebox").value;
+    socket.send(message);
+    document.getElementById("messagebox").value = "";
+  }
+  document.getElementById("messagebox").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      sendmessage(); // 엔터 키 눌렀을 때 실행
+    }
+  });
+  // 메시지 수신 시
+  socket.onmessage = function(event) {
+    console.log("서버로부터 받은 메시지:", event.data);
+    document.getElementById("testbox").innerHTML += event.data + "<br>";
+  };
+
+  // 연결 종료 시
+  socket.onclose = function(event) {
+    window.location.href = '/testLogin'
+    console.log("WebSocket 연결 종료:", event);
+  };
+
+  // 에러 발생 시
+  socket.onerror = function(error) {
+    window.location.href = '/testLogin'
+    console.error("WebSocket 에러:", error);
+  };
+</script>
+</body>
+</html>
