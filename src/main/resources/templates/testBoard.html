@@ -58,9 +58,18 @@
                 내용 : ${boardList.content}
             </div>
             `;
+            if(boardList.imageFile != null){
+                document.getElementById("contentBox").innerHTML += `
+            <div>
+                <img src="/${boardList.imageFile}" style="width: 300px;">
+            </div>
+            <div>
+                <a href="/${boardList.imageFile}" target="_blank">크게보기</a>
+            </div>`
+            }
         }else{
             document.getElementById("boardBox1").innerHTML = "<div><hr></div>";
-            for(let i = 0; i < boardList.length; i++){
+            for(let i = boardList.length-1; i >= 0; i--){
                 document.getElementById("boardBox1").innerHTML += `
             <div onclick="viewContent(${i})">
                 글쓴이 : ${boardList[i].author}<br>
@@ -99,38 +108,45 @@
     function writeBoard2(){
         const title = document.getElementById("boardTitle").value;
         const content = document.getElementById("boardContent").value;
-        //const file = document.getElementById("boardFile").files[0];
-        const unique = Date.now();
+        const file = document.getElementById("boardFile").files[0];
+        let imageFile = "x";
         // console.log(title);
         // console.log(content);
         // console.log(file.files[0].name);
-        console.log(unique);
-        const message = {
-            type: "write",
-            title: title,
-            content: content
-        }
-        socket.send(JSON.stringify(message));
-        closeWrite();
-    }
-    function messageToServer(t, c, u){
-        const message = {
-            unique: u,
-            title: t,
-            content: c
-        };
-        socket.send(JSON.stringify(message));
-    }
-    function imageToServer(f, u){
-        const reader = new FileReader();
-        reader.onload = function (e){
-            const imageFile = e.target.result;
-            const message = {
-                unique: u,
-                image: imageFile
-            }
-        };
+        if(file){
+            const formData = new FormData;
+            formData.append('file', file);
 
+            fetch('/tBoard/upload',{
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.text())
+                .then(data =>{
+                    imageFile = data
+                    const message = {
+                        type: "write",
+                        title: title,
+                        content: content,
+                        imageFile: imageFile
+                    }
+                    socket.send(JSON.stringify(message));
+                })
+                .catch(error =>{
+                    console.error('Error:', error)
+                })
+
+        }else {
+            const message = {
+                type: "write",
+                title: title,
+                content: content,
+                imageFile: imageFile
+            }
+            socket.send(JSON.stringify(message));
+        }
+
+        closeWrite();
     }
   </script>
 </body>

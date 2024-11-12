@@ -11,4 +11,5 @@ public class TestBoardVO {
     String content;
     String author;
     String regDate;
+    String imageFile;
 }

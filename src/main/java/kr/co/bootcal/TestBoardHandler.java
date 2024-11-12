@@ -30,6 +30,7 @@ public class TestBoardHandler implements WebSocketHandler {
         JSONObject jsonMessage = new JSONObject(payLoad);
 
         if(jsonMessage.getString("type").equals("write")){
+            TestBoardVO testBoardVO = new TestBoardVO();
             String title = jsonMessage.getString("title");
             String content = jsonMessage.getString("content");
             LocalDateTime originRegDate = LocalDateTime.now();
@@ -37,8 +38,10 @@ public class TestBoardHandler implements WebSocketHandler {
             String regDate = originRegDate.format(formatter);
             Map<String, Object> attribute = session.getAttributes();
             String author = (String) attribute.get("nickname");
-
-            TestBoardVO testBoardVO = new TestBoardVO();
+            if(!jsonMessage.getString("imageFile").equals("x")){
+                String imageFile = jsonMessage.getString("imageFile");
+                testBoardVO.setImageFile(imageFile);
+            }
             testBoardVO.setTitle(title);
             testBoardVO.setContent(content);
             testBoardVO.setAuthor(author);
